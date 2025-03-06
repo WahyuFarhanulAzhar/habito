@@ -11,7 +11,7 @@ gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
 CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
   CustomEase.create("primary-ease-out", "0.17,0.84,0.44,1"),
   ScrollTrigger.defaults({
-    markers: true,
+    markers: false,
   });
 
 function initLenis() {
