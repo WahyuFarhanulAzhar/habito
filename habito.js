@@ -1,10 +1,11 @@
-import { gsap } from "https://cdn.skypack.dev/gsap@3.12.2";
-import { ScrollTrigger } from "https://cdn.skypack.dev/gsap/ScrollTrigger";
-import { Flip } from "https://cdn.skypack.dev/gsap/Flip";
-import { CustomEase } from "https://cdn.skypack.dev/gsap/CustomEase";
-import Lenis from "https://cdn.skypack.dev/lenis@1.0.19";
-import SplitType from "https://cdn.skypack.dev/split-type@0.3.3";
-import Swiper from "https://cdn.skypack.dev/swiper@11.0.5";
+import gsap from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/index.js";
+import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/ScrollTrigger.js";
+import { Flip } from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/Flip.js";
+import { CustomEase } from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/CustomEase.js";
+
+import Lenis from "https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.19/dist/lenis.mjs";
+import SplitType from "https://cdn.jsdelivr.net/npm/split-type@0.3.3/+esm";
+import Swiper from "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs";
 
 gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
 CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
@@ -31,6 +32,8 @@ function initLenis() {
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
+
+    return lenis;
   }
 }
 
@@ -59,6 +62,133 @@ function initMarquee() {
   });
 }
 
+function initTrMarquee() {
+  function e(e, t) {
+    const r = typeof e;
+    return "string" !== typeof t || "" === t.trim() ? e : ("true" === t && "boolean" === r) || (("false" !== t || "boolean" !== r) && (isNaN(t) && "string" === r ? t : isNaN(t) || "number" !== r ? e : +t));
+  }
+  $("[tr-marquee-element='component']").each(function () {
+    function t(e) {
+      d = e;
+      const t = {
+          value: 1,
+        },
+        r = gsap.timeline({
+          onUpdate: () => g.timeScale(t.value),
+        });
+      e
+        ? (r.fromTo(
+            t,
+            {
+              value: m,
+            },
+            {
+              value: 0,
+              duration: 0.5,
+            }
+          ),
+          n.addClass("is-paused"))
+        : (r.fromTo(
+            t,
+            {
+              value: 0,
+            },
+            {
+              value: m,
+              duration: 0.5,
+            }
+          ),
+          n.removeClass("is-paused"));
+    }
+    let r = $(this),
+      o = r.find("[tr-marquee-element='panel']"),
+      a = r.find("[tr-marquee-element='triggerhover']"),
+      n = r.find("[tr-marquee-element='triggerclick']"),
+      i = e(100, r.attr("tr-marquee-speed")),
+      l = e(!1, r.attr("tr-marquee-vertical")),
+      s = e(!1, r.attr("tr-marquee-reverse")),
+      c = e(!1, r.attr("tr-marquee-scrolldirection")),
+      u = e(!1, r.attr("tr-marquee-scrollscrub")),
+      p = -100,
+      m = 1,
+      d = !1;
+    s && (p = 100);
+    const g = gsap.timeline({
+      repeat: -1,
+      onReverseComplete: () => g.progress(1),
+    });
+    l
+      ? ((i = o.first().height() / i),
+        g.fromTo(
+          o,
+          {
+            yPercent: 0,
+          },
+          {
+            yPercent: p,
+            ease: "none",
+            duration: i,
+          }
+        ))
+      : ((i = o.first().width() / i),
+        g.fromTo(
+          o,
+          {
+            xPercent: 0,
+          },
+          {
+            xPercent: p,
+            ease: "none",
+            duration: i,
+          }
+        ));
+    const f = {
+      value: 1,
+    };
+    ScrollTrigger.create({
+      trigger: "body",
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate: (e) => {
+        if (!d && (c && m !== e.direction && ((m = e.direction), g.timeScale(e.direction)), u)) {
+          let t = 0.006 * e.getVelocity();
+          (t = gsap.utils.clamp(-20, 20, t)),
+            gsap
+              .timeline({
+                onUpdate: () => g.timeScale(f.value),
+              })
+              .fromTo(
+                f,
+                {
+                  value: t,
+                },
+                {
+                  value: m,
+                  duration: 0.5,
+                }
+              );
+        }
+      },
+    }),
+      window.matchMedia("(pointer: fine)").matches && (a.on("mouseenter", () => t(!0)), a.on("mouseleave", () => t(!1))),
+      n.on("click", function () {
+        $(this).hasClass("is-paused") ? t(!1) : t(!0);
+      });
+  });
+}
+
+function initScrollToTop(lenisInstance) {
+  const btn = document.querySelector("[scroll-to-top]");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    lenisInstance.scrollTo(0, {
+      duration: 1.2,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
+    });
+  });
+}
+
 function initReelsAnimation() {
   $(".about-wrapper").each(function () {
     const triggerElement = $(this);
@@ -73,7 +203,7 @@ function initReelsAnimation() {
           scrub: 1,
         },
       })
-      .fromTo(targetElement, { width: "100%", y: "0svh" }, { width: "25%", y: "150svh" });
+      .fromTo(targetElement, { width: "100%", y: "0svh" }, { width: "25%", y: "167svh" });
   });
 }
 
@@ -315,27 +445,36 @@ function homeLoad() {
 
   tl.from("[hero-text] .char", {
     yPercent: 110,
-    stagger: { amount: 0.3 },
+    stagger: { amount: 0.8 },
     duration: 1.25,
     ease: "primary-ease-out",
   });
-  tl.from(".hero-marquee-item", { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
+  tl.from(".hero-marquee-item", { yPercent: 110, duration: 2.25, ease: "primary-ease" }, 0);
+  tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.8);
+  tl.from(".reels-wrap", { yPercent: 50, opacity: 0, duration: 0.8 }, 1);
 }
 
 function initAllAnimations() {
-  initLenis();
+  const lenis = initLenis();
+
   initSplitText();
   initMarquee();
-  initReelsAnimation();
-  //aboutReelsAnimation();
-  initReelsFlip();
+  initTrMarquee();
+  initScrollToTop(lenis);
   linesAnimation();
   initSectionOverlap();
+}
+
+function initHomeAnimation() {
+  homeLoad();
+  initReelsAnimation();
+  aboutReelsAnimation();
+  //initReelsFlip();
   initWorkSectionAnimation();
   initBrandingAnimation();
   initServiceAnimation();
   reviewSwiper();
-  homeLoad();
 }
 
-$(document).ready(initAllAnimations);
+initAllAnimations();
+initHomeAnimation();
