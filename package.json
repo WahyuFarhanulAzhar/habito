@@ -1,0 +1,9 @@
+{
+	"dependencies": {
+		"@barba/core": "^2.10.3",
+		"gsap": "^3.12.7",
+		"lenis": "^1.2.1",
+		"split-type": "^0.3.4",
+		"swiper": "^11.2.5"
+	}
+}

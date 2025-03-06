@@ -1,0 +1,282 @@
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/Flip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@0.2.28/bundled/lenis.js"></script>
+<script src="https://unpkg.com/split-type"></script>
+
+<script>
+  gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
+
+  ScrollTrigger.defaults({
+    markers: true,
+  });
+
+  let lenis;
+  if (Webflow.env("editor") === undefined) {
+    lenis = new Lenis({
+      duration: 2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // https://www.desmos.com/calculator/brs54l4xou
+      direction: "vertical", // vertical, horizontal
+      gestureDirection: "vertical", // vertical, horizontal, both
+      smooth: true,
+      mouseMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  }
+
+  const typeSplit = new SplitType("[split]", {
+    types: "words, chars",
+    tagName: "span",
+  });
+
+  gsap.to(".hero-marquee-wrap", {
+    xPercent: -100,
+    ease: "linear",
+    duration: 50, // Sesuaikan kecepatan marquee
+    repeat: -1,
+  });
+
+  $(".section-hero-group").each(function (index) {
+    const triggerElement = $(this);
+    const targetElement = $(".reels-wrap");
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        start: "top top",
+        end: "90% bottom",
+        scrub: 1,
+      },
+    });
+    tl.from(targetElement, {
+      y: "-88svh",
+      x: "70svw",
+      width: "25%",
+      duration: 1.25,
+    });
+  });
+
+  // Light to Dark Color Change
+  $(".work-head-block").each(function (index) {
+    const triggerElement = $(this);
+    const targetElement = $(".section.is-work");
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "60% top",
+        end: "80% bottom",
+        scrub: 1,
+      },
+    });
+
+    const tl2 = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "top top",
+        end: "bottom 50%",
+        scrub: 1,
+      },
+    });
+
+    tl.fromTo(
+      targetElement,
+      {
+        backgroundColor: "#CBEB3A",
+        color: "#111",
+        duration: 2,
+      },
+      {
+        backgroundColor: "#111",
+        color: "#fff",
+        duration: 2,
+      }
+    );
+
+    tl2.from(".work-head-wrap", {
+      scale: 1.75,
+      duration: 1,
+    });
+  });
+
+  $(".section.is-branding").each(function (index) {
+    const triggerElement = $(this);
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "top top",
+        end: "80% bottom",
+        scrub: 1,
+      },
+    });
+
+    const tl2 = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "10% top",
+        end: "80% bottom",
+        scrub: 1,
+      },
+    });
+
+    tl.fromTo(
+      ".branding-head",
+      {
+        scale: 0.55,
+        duration: 1,
+      },
+      {
+        scale: 1,
+        duration: 1,
+      },
+      0.0
+    );
+
+    tl.fromTo(
+      ".branding-head-wrap",
+      {
+        scale: 1.6,
+        duration: 1,
+      },
+      {
+        scale: 1,
+        duration: 1,
+      },
+      0.0
+    );
+
+    tl2.fromTo(
+      ".section-nav",
+      {
+        opacity: 0,
+        duration: 1,
+      },
+      {
+        opacity: 1,
+        duration: 1,
+      },
+      0.0
+    );
+
+    tl2.fromTo(
+      "[branding-img]",
+      {
+        width: "0 em",
+        duration: 1,
+      },
+      {
+        width: "7.5em",
+        duration: 1,
+      },
+      0.0
+    );
+
+    tl2.fromTo(
+      "[text-wrap]",
+      {
+        x: "-0.75em",
+        duration: 1,
+      },
+      {
+        x: "0em",
+        duration: 1,
+      },
+      0.0
+    );
+
+    tl2.from(
+      ".branding-head-wrap",
+      {
+        yPercent: 35,
+        duration: 1,
+      },
+      {
+        yPercent: 0,
+        duration: 1,
+      },
+      0.0
+    );
+  });
+
+  $(".section.is-service").each(function (index) {
+    const triggerElement = $(this);
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "top 80%",
+        end: "bottom bottom",
+        scrub: 1,
+      },
+    });
+
+    const tl3 = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "top 80%",
+        end: "bottom bottom",
+        scrub: 1,
+      },
+    });
+
+    const tl2 = gsap.timeline({
+      scrollTrigger: {
+        trigger: triggerElement,
+        // trigger element - viewport
+        // can also use "20px 80%"
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1,
+      },
+    });
+
+    tl.fromTo(
+      ".service-head",
+      {
+        x: "50vw",
+        duration: 2,
+      },
+      {
+        x: "-50vw",
+        duration: 2,
+      }
+    );
+
+    tl3.from(".service-text .char", {
+      y: "100svh",
+      scale: 1.5,
+      stagger: { each: 0.3 },
+      duration: 2,
+    });
+
+    tl2.from(".service-item", {
+      y: "100svh",
+      stagger: 0.3,
+      duration: 2,
+      scurb: 1,
+    });
+  });
+</script>
