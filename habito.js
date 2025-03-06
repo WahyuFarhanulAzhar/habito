@@ -451,7 +451,7 @@ function homeLoad() {
   });
   tl.from(".hero-marquee-item", { yPercent: 110, duration: 2, ease: "primary-ease" }, 0);
   tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.4);
-  tl.from(".reels-wrap", { opacity: 0, duration: 0.8 }, 0.6);
+  tl.from(".reels-wrap", { scale: 0, duration: 0.8 }, 0.6);
 }
 
 function initAllAnimations() {
