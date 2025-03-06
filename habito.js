@@ -2,7 +2,6 @@ import { gsap } from "https://cdn.skypack.dev/gsap@3.12.2";
 import { ScrollTrigger } from "https://cdn.skypack.dev/gsap/ScrollTrigger";
 import { Flip } from "https://cdn.skypack.dev/gsap/Flip";
 import { CustomEase } from "https://cdn.skypack.dev/gsap/CustomEase";
-import barba from "https://cdn.skypack.dev/@barba/core@2.10.3";
 import Lenis from "https://cdn.skypack.dev/lenis@1.0.19";
 import SplitType from "https://cdn.skypack.dev/split-type@0.3.3";
 import Swiper from "https://cdn.skypack.dev/swiper@11.0.5";
