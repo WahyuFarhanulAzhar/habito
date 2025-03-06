@@ -1,10 +1,11 @@
-import gsap from "gsap";
-import { CustomEase } from "gsap/CustomEase";
-import { Flip } from "gsap/Flip";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "lenis";
-import SplitType from "split-type";
-import Swiper from "swiper";
+import { gsap } from "https://cdn.skypack.dev/gsap@3.12.2";
+import { ScrollTrigger } from "https://cdn.skypack.dev/gsap/ScrollTrigger";
+import { Flip } from "https://cdn.skypack.dev/gsap/Flip";
+import { CustomEase } from "https://cdn.skypack.dev/gsap/CustomEase";
+import barba from "https://cdn.skypack.dev/@barba/core@2.10.3";
+import Lenis from "https://cdn.skypack.dev/lenis@1.0.19";
+import SplitType from "https://cdn.skypack.dev/split-type@0.3.3";
+import Swiper from "https://cdn.skypack.dev/swiper@11.0.5";
 
 gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
 CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
