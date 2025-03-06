@@ -449,9 +449,9 @@ function homeLoad() {
     duration: 1.25,
     ease: "primary-ease-out",
   });
-  tl.from(".hero-marquee-item", { yPercent: 110, duration: 2.25, ease: "primary-ease" }, 0);
-  tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.8);
-  tl.from(".reels-wrap", { yPercent: 50, opacity: 0, duration: 0.8 }, 1);
+  tl.from(".hero-marquee-item", { yPercent: 110, duration: 2, ease: "primary-ease" }, 0);
+  tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.4);
+  tl.from(".reels-wrap", { opacity: 0, duration: 0.8 }, 0.6);
 }
 
 function initAllAnimations() {
