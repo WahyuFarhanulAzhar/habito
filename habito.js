@@ -1,4 +1,3 @@
-import barba from "@barba/core";
 import gsap from "gsap";
 import { CustomEase } from "gsap/CustomEase";
 import { Flip } from "gsap/Flip";
