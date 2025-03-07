@@ -496,7 +496,7 @@ function homeLoad() {
   });
   tl.from(".hero-marquee-item", { yPercent: 110, duration: 2.25, ease: "primary-ease" }, 0);
   tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.8);
-  tl.from(".reels-wrap", { scale: 0, duration: 0.8 }, 1);
+  tl.from(".reels-wrap", { scale: 0, duration: 0.8, ease: "power3.out" }, 0.2);
 }
 
 function initAllAnimations() {
