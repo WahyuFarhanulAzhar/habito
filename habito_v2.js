@@ -11,7 +11,7 @@ gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
 CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
   CustomEase.create("primary-ease-out", "0.17,0.84,0.44,1"),
   ScrollTrigger.defaults({
-    markers: false,
+    markers: true,
   });
 
 function initLenis() {
@@ -392,6 +392,19 @@ function initServiceAnimation() {
   });
 }
 
+function initHeadOverlay() {
+  gsap
+    .timeline({
+      scrollTrigger: {
+        trigger: ".section.is-about",
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1,
+      },
+    })
+    .to(".overlay", { opacity: 0.5 });
+}
+
 function initSectionOverlap() {
   gsap.utils.toArray("[data-overlap-previous]").forEach((e) => {
     const t = e.previousElementSibling;
@@ -496,7 +509,7 @@ function homeLoad() {
   });
   tl.from(".hero-marquee-item", { yPercent: 110, duration: 2.25, ease: "primary-ease" }, 0);
   tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.8);
-  tl.from(".reels-wrap", { scale: 0, duration: 0.8, ease: "power3.out" }, 0.2);
+  tl.from(".reels-wrap", { scale: 0, duration: 0.8 }, 1);
 }
 
 function initAllAnimations() {
@@ -512,6 +525,7 @@ function initAllAnimations() {
 
 function initHomeAnimation() {
   homeLoad();
+  initHeadOverlay();
   //initReelsAnimation();
   //aboutReelsAnimation();
   //initReelsFlip();
