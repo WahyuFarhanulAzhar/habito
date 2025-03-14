@@ -2,17 +2,22 @@ import gsap from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/index.js";
 import { ScrollTrigger } from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/ScrollTrigger.js";
 import { Flip } from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/Flip.js";
 import { CustomEase } from "https://cdn.jsdelivr.net/npm/gsap@3.12.2/CustomEase.js";
-
+import barbaCore from "https://cdn.skypack.dev/@barba/core@2.10.3";
 import Lenis from "https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.19/dist/lenis.mjs";
 import SplitType from "https://cdn.jsdelivr.net/npm/split-type@0.3.3/+esm";
 import Swiper from "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs";
 
-gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
-CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
-  CustomEase.create("primary-ease-out", "0.17,0.84,0.44,1"),
-  ScrollTrigger.defaults({
-    markers: true,
+function initGSAP() {
+  gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
+  CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
+    CustomEase.create("primary-ease-out", "0.17,0.84,0.44,1"),
+    ScrollTrigger.defaults({
+      markers: false,
+    });
+  gsap.defaults({
+    duration: 1.25,
   });
+}
 
 function initLenis() {
   if (Webflow.env("editor") === undefined) {
@@ -32,6 +37,36 @@ function initLenis() {
 
     return lenis;
   }
+}
+
+function resetWebflow(e) {
+  const t = $(new DOMParser().parseFromString(e.next.html, "text/html")).find("html");
+  $("html").attr("data-wf-page", t.attr("data-wf-page")),
+    window.Webflow && window.Webflow.destroy(),
+    window.Webflow && window.Webflow.ready(),
+    window.Webflow && window.Webflow.require("ix2").init(),
+    $(".w--current").removeClass("w--current"),
+    $("a").each(function () {
+      $(this).attr("href") === window.location.pathname && $(this).addClass("w--current");
+    }),
+    t.find("[data-barba-script]").each(function () {
+      let e = $(this).text();
+      if (e.includes("DOMContentLoaded")) {
+        const t = e.replace(/window\.addEventListener\("DOMContentLoaded",\s*\(\s*event\s*\)\s*=>\s*{\s*/, "");
+        e = t.replace(/\s*}\s*\);\s*$/, "");
+      }
+      const t = document.createElement("script");
+      (t.type = "text/javascript"), $(this).attr("src") && (t.src = $(this).attr("src")), (t.text = e), document.body.appendChild(t).remove();
+    });
+}
+
+function disableCurrentLinks() {
+  document.addEventListener("click", function (e) {
+    const t = e.target.closest("a");
+    if (t) {
+      if (window.location.href.split("#")[0] === t.href.split("#")[0]) return void e.preventDefault();
+    }
+  });
 }
 
 function initSplitText() {
@@ -498,18 +533,47 @@ function linesAnimation() {
   });
 }
 
-function homeLoad() {
-  const tl = gsap.timeline();
+function leaveAnimation(e) {
+  const t = document.querySelector(".transition-overlay"),
+    r = gsap.timeline();
+  return (
+    gsap.set(t, {
+      display: "block",
+    }),
+    "closed" !== navStatus && (setNavStatus("closing"), closeNav(navStatus, setNavStatus)),
+    r
+      .to(e, {
+        opacity: 0,
+        ease: "primary-ease",
+      })
+      .from(
+        t,
+        {
+          autoAlpha: 0,
+        },
+        0
+      ),
+    r
+  );
+}
 
-  tl.from("[hero-text] .char", {
-    yPercent: 110,
-    stagger: { amount: 0.8 },
-    duration: 1.25,
-    ease: "primary-ease-out",
+function enterAnimation(e) {
+  const t = gsap.timeline({
+    onComplete: () => {
+      ScrollTrigger.refresh(),
+        gsap.set(e, {
+          clearProps: "transform",
+        });
+    },
   });
-  tl.from(".hero-marquee-item", { yPercent: 110, duration: 2.25, ease: "primary-ease" }, 0);
-  tl.from("[hero-btn]", { yPercent: 50, opacity: 0, duration: 0.8 }, 0.8);
-  tl.from(".reels-wrap", { scale: 0, duration: 0.8 }, 1);
+  return (
+    t.from(e, {
+      y: "100svh",
+      ease: "primary-ease",
+      duration: 1.25,
+    }),
+    t
+  );
 }
 
 function initAllAnimations() {
@@ -518,13 +582,10 @@ function initAllAnimations() {
   initSplitText();
   initMarquee();
   initTrMarquee();
-  initScrollToTop(lenis);
+  //initScrollToTop(lenis);
   linesAnimation();
-  initSectionOverlap();
-}
 
-function initHomeAnimation() {
-  homeLoad();
+  // Home
   initHeadOverlay();
   //initReelsAnimation();
   //aboutReelsAnimation();
@@ -534,7 +595,177 @@ function initHomeAnimation() {
   initServiceAnimation();
   initPartnerAccordion();
   reviewSwiper();
+  ScrollTrigger.matchMedia({
+    "(min-width: 992px)": function () {
+      initSectionOverlap();
+    },
+  });
 }
 
-initAllAnimations();
-initHomeAnimation();
+function firstLoad() {
+  const e = document.getElementById("loader"),
+    t =
+      (document.querySelector(".loader_overlay"),
+      document.querySelector(".loader_logo_wrap"),
+      document.querySelector(".loader_logo_fill"),
+      gsap.timeline({
+        onComplete: () => {
+          e.remove();
+        },
+      }));
+  return (
+    t.to(e, {
+      yPercent: -100,
+      ease: "primary-ease",
+      duration: 1.25,
+    }),
+    t
+  );
+}
+
+function initHomeAnimation() {
+  const tl = gsap.timeline();
+  const typeSplit = new SplitType("[load-split]", {
+    types: "lines, words, chars",
+    tagName: "span",
+  });
+
+  tl.from(
+    "[hero-text] .char",
+    {
+      yPercent: 110,
+      stagger: { amount: 0.4 },
+      duration: 1.25,
+      ease: "primary-ease-out",
+    },
+    0.4
+  );
+  tl.from("[hero-head] .char", { yPercent: 110, duration: 1.25, ease: "primary-ease" }, 0.2);
+  tl.from("[hero-btn]", { yPercent: 50, opacity: 0, ease: "primary-ease", duration: 1.25 }, 0.6);
+  tl.from(".reels-wrap", { scale: 0, ease: "primary-ease-out", duration: 1.25 }, 0.6);
+}
+
+function initWorkAnimation() {
+  const tl = gsap.timeline();
+  const typeSplit = new SplitType("[load-split]", {
+    types: "lines, words, chars",
+    tagName: "span",
+  });
+
+  tl.from(
+    "[hero-text] .char",
+    {
+      yPercent: 110,
+      stagger: { amount: 0.8 },
+      duration: 1.25,
+      ease: "primary-ease-out",
+    },
+    0.4
+  );
+  tl.from(".hero-marquee", { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
+}
+
+function pageTransitionHome(e) {
+  const t = gsap.timeline();
+  return t.add(enterAnimation(e)).add(initHomeAnimation(e), 0.8), t;
+}
+
+function pageTransitionWork(e) {
+  const t = gsap.timeline();
+  return t.add(enterAnimation(e)).add(initWorkAnimation(e), 0.8), t;
+}
+
+function homeFirstLoad(e) {
+  const t = gsap.timeline();
+  return t.add(firstLoad()).add(initHomeAnimation(e), 0.8), t;
+}
+
+function initPageTransitions() {
+  scroll = initLenis();
+  const e = barba;
+  e.hooks.once(() => {
+    initAllAnimations();
+    disableCurrentLinks();
+  }),
+    e.hooks.beforeLeave((e) => {
+      scroll.stop(), resetWebflow(e);
+    }),
+    e.hooks.enter((e) => {
+      gsap.set(e.next.container, {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        zIndex: 3,
+      }),
+        disableCurrentLinks();
+    }),
+    e.hooks.afterEnter(() => {
+      window.scrollTo(0, 0);
+    }),
+    e.hooks.after((e) => {
+      gsap.set(e.next.container, {
+        position: "relative",
+      }),
+        initAllAnimations(),
+        scroll.resize(),
+        scroll.start(),
+        ScrollTrigger.refresh();
+    }),
+    e.init({
+      transitions: [
+        {
+          name: "to-home",
+          to: {
+            namespace: "home",
+          },
+          sync: !0,
+          once({ next: e }) {
+            pageTransitionHome(e.container);
+          },
+          async leave({ current: e }) {
+            await leaveAnimation(e.container);
+          },
+          enter({ next: e }) {
+            pageTransitionHome(e.container);
+          },
+        },
+        {
+          name: "to-work",
+          to: {
+            namespace: "work",
+          },
+          sync: !0,
+          once({ next: e }) {
+            pageTransitionWork(e.container);
+          },
+          async leave({ current: e }) {
+            await leaveAnimation(e.container);
+          },
+          enter({ next: e }) {
+            pageTransitionWork(e.container);
+          },
+        },
+        {
+          name: "default",
+          sync: !0,
+          once({ next: e }) {
+            enterAnimation(e.container);
+          },
+          async leave({ current: e }) {
+            await leaveAnimation(e.container);
+          },
+          enter({ next: e }) {
+            enterAnimation(e.container);
+          },
+        },
+      ],
+    });
+}
+
+let mm = gsap.matchMedia(),
+  navStatus = "closed";
+const setNavStatus = (e) => {
+  (navStatus = e), console.log(navStatus);
+};
+initGSAP(), initPageTransitions();
