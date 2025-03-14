@@ -682,7 +682,7 @@ function homeFirstLoad(e) {
 
 function initPageTransitions() {
   scroll = initLenis();
-  const e = barba;
+  let e = barbaCore;
   e.hooks.once(() => {
     initAllAnimations();
     disableCurrentLinks();
