@@ -543,7 +543,9 @@ function leaveAnimation(e) {
     "closed" !== navStatus && (setNavStatus("closing"), closeNav(navStatus, setNavStatus)),
     r
       .to(e, {
-        opacity: 0,
+        opacity: 0.1,
+        y: "-20svh",
+        scale: 0.94,
         ease: "primary-ease",
       })
       .from(
@@ -577,7 +579,7 @@ function enterAnimation(e) {
 }
 
 function initAllAnimations() {
-  const lenis = initLenis();
+  //const lenis = initLenis();
 
   initSplitText();
   initMarquee();
@@ -604,20 +606,16 @@ function initAllAnimations() {
 
 function firstLoad() {
   const e = document.getElementById("loader"),
-    t =
-      (document.querySelector(".loader_overlay"),
-      document.querySelector(".loader_logo_wrap"),
-      document.querySelector(".loader_logo_fill"),
-      gsap.timeline({
-        onComplete: () => {
-          e.remove();
-        },
-      }));
+    t = gsap.timeline({
+      onComplete: () => {
+        e.remove();
+      },
+    });
   return (
     t.to(e, {
-      yPercent: -100,
-      ease: "primary-ease",
+      y: "-100svh",
       duration: 1.25,
+      ease: "primary-ease",
     }),
     t
   );
@@ -660,9 +658,9 @@ function initWorkAnimation() {
       duration: 1.25,
       ease: "primary-ease-out",
     },
-    0.4
+    0.2
   );
-  tl.from(".hero-marquee", { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
+  tl.from(".marquee-block", { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
 }
 
 function pageTransitionHome(e) {
@@ -682,7 +680,7 @@ function homeFirstLoad(e) {
 
 function initPageTransitions() {
   scroll = initLenis();
-  let e = barbaCore;
+  const e = barbaCore;
   e.hooks.once(() => {
     initAllAnimations();
     disableCurrentLinks();
@@ -721,7 +719,7 @@ function initPageTransitions() {
           },
           sync: !0,
           once({ next: e }) {
-            pageTransitionHome(e.container);
+            homeFirstLoad(e.container);
           },
           async leave({ current: e }) {
             await leaveAnimation(e.container);
@@ -737,7 +735,7 @@ function initPageTransitions() {
           },
           sync: !0,
           once({ next: e }) {
-            pageTransitionWork(e.container);
+            firstLoad(), pageTransitionWork(e.container);
           },
           async leave({ current: e }) {
             await leaveAnimation(e.container);
@@ -750,7 +748,7 @@ function initPageTransitions() {
           name: "default",
           sync: !0,
           once({ next: e }) {
-            enterAnimation(e.container);
+            firstLoad(), enterAnimation(e.container);
           },
           async leave({ current: e }) {
             await leaveAnimation(e.container);
