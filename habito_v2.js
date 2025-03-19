@@ -341,15 +341,23 @@ function initBrandingAnimation() {
 }
 
 function initPartnerAccordion() {
-  $(".partner-item").each(function () {
+  $(".partner-item").each(function (index) {
     const $item = $(this);
     const $clientImg = $item.find(".client-img");
     const $clientName = $item.find(".client-name");
     const $text = $item.find(".partner-item-content");
 
-    // Set default state
-    gsap.set($clientImg, { scale: 0 });
-    gsap.set($clientName, { x: -52 });
+    // Jika ini adalah elemen pertama, buat jadi aktif
+    if (index === 0) {
+      $item.addClass("active");
+      $text.show(); // Menampilkan konten tanpa animasi slide
+      gsap.set($clientImg, { scale: 1 });
+      gsap.set($clientName, { x: 0 });
+    } else {
+      gsap.set($clientImg, { scale: 0 });
+      gsap.set($clientName, { x: -52 });
+      $text.hide(); // Sembunyikan konten lainnya
+    }
 
     // Hover Animation
     $item.hover(
@@ -427,6 +435,19 @@ function initServiceAnimation() {
   });
 }
 
+function imgReveal() {
+  gsap
+    .timeline({
+      scrollTrigger: {
+        trigger: "[img-wrap]",
+        start: "top 80%",
+        end: "top top",
+      },
+    })
+    .from(".img-block", { yPercent: -100, duration: 1.25, ease: "primary-ease-out" })
+    .from("[img-wrap]", { scale: 1.2, duration: 1.25, ease: "primary-ease-out" });
+}
+
 function initHeadOverlay() {
   gsap
     .timeline({
@@ -498,6 +519,7 @@ function initSectionOverlap() {
       });
   });
 }
+
 function reviewSwiper() {
   const swiper = new Swiper(".swiper.is-review", {
     direction: "horizontal",
@@ -578,6 +600,40 @@ function enterAnimation(e) {
   );
 }
 
+function handleMouseMove(event) {
+  const heroTop = document.querySelector(".hero-top");
+  const reelsWrap = document.querySelector(".reels-wrap");
+
+  if (!heroTop || !reelsWrap) return;
+
+  const heroRect = heroTop.getBoundingClientRect();
+  const reelsRect = reelsWrap.getBoundingClientRect();
+
+  const mouseX = event.clientX; // Posisi mouse di seluruh halaman
+  const windowWidth = window.innerWidth; // Lebar viewport
+  const maxMovement = heroRect.width - reelsRect.width; // Batas pergerakan dalam parent
+
+  // Mengonversi posisi mouse ke dalam range pergerakan
+  let targetX = (mouseX / windowWidth) * maxMovement;
+
+  // Pastikan reels-wrap tidak keluar dari parent
+  targetX = Math.max(0, Math.min(targetX, maxMovement));
+
+  gsap.to(reelsWrap, {
+    x: targetX,
+    duration: 2,
+    ease: "power3.out",
+  });
+}
+
+// Tambahkan event listener setelah DOM siap
+document.addEventListener("DOMContentLoaded", () => {
+  const heroTop = document.querySelector(".hero-top");
+  if (heroTop) {
+    heroTop.addEventListener("mousemove", handleMouseMove);
+  }
+});
+
 function initAllAnimations() {
   //const lenis = initLenis();
 
@@ -588,6 +644,7 @@ function initAllAnimations() {
   linesAnimation();
 
   // Home
+  document.addEventListener("mousemove", handleMouseMove);
   initHeadOverlay();
   //initReelsAnimation();
   //aboutReelsAnimation();
@@ -651,7 +708,7 @@ function initWorkAnimation() {
   });
 
   tl.from(
-    "[hero-text] .char",
+    "[work-text] .char",
     {
       yPercent: 110,
       stagger: { amount: 0.8 },
@@ -660,7 +717,27 @@ function initWorkAnimation() {
     },
     0.2
   );
-  tl.from(".marquee-block", { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
+  tl.from('[marquee-name="work"]', { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
+}
+
+function initAboutAnimation() {
+  const tl = gsap.timeline();
+  const typeSplit = new SplitType("[load-split]", {
+    types: "lines, words, chars",
+    tagName: "span",
+  });
+
+  tl.from(
+    "[about-text] .char",
+    {
+      yPercent: 110,
+      stagger: { amount: 0.8 },
+      duration: 1.25,
+      ease: "primary-ease-out",
+    },
+    0.2
+  );
+  tl.from('[marquee-name="about"]', { yPercent: 110, duration: 1.25, ease: "primary-ease-out" }, 0.2);
 }
 
 function pageTransitionHome(e) {
@@ -671,6 +748,11 @@ function pageTransitionHome(e) {
 function pageTransitionWork(e) {
   const t = gsap.timeline();
   return t.add(enterAnimation(e)).add(initWorkAnimation(e), 0.8), t;
+}
+
+function pageTransitionAbout(e) {
+  const t = gsap.timeline();
+  return t.add(enterAnimation(e)).add(initAboutAnimation(e), 0.8), t;
 }
 
 function homeFirstLoad(e) {
@@ -742,6 +824,22 @@ function initPageTransitions() {
           },
           enter({ next: e }) {
             pageTransitionWork(e.container);
+          },
+        },
+        {
+          name: "to-about",
+          to: {
+            namespace: "about",
+          },
+          sync: !0,
+          once({ next: e }) {
+            firstLoad(), pageTransitionAbout(e.container);
+          },
+          async leave({ current: e }) {
+            await leaveAnimation(e.container);
+          },
+          enter({ next: e }) {
+            pageTransitionAbout(e.container);
           },
         },
         {
