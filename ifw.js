@@ -46,7 +46,7 @@ function initSplitText() {
   });
 
   const typeSplit2 = new SplitType("[split-2]", {
-    types: "lines, words, chars",
+    types: "lines",
     tagName: "div",
   });
 
@@ -273,6 +273,9 @@ function eventSection() {
   const triggerElement = document.querySelectorAll(".section.is-event");
   const head = document.querySelectorAll(".event-head");
   const content = document.querySelectorAll(".event-content");
+  const item2 = document.querySelectorAll(".event-item.is-2");
+  const item3 = document.querySelectorAll(".event-item.is-3");
+  const item4 = document.querySelectorAll(".event-item.is-4");
 
   gsap
     .timeline({
@@ -286,13 +289,39 @@ function eventSection() {
     .to(head, {
       scale: 0.8,
       duration: 2,
-      ease: "none",
+      ease: "power3.inOut",
     })
+    .from(
+      item2,
+      {
+        y: "-11.0625em",
+        duration: 2,
+        ease: "power3.inOut",
+      },
+      0
+    )
+    .from(
+      item3,
+      {
+        y: "-2em",
+        duration: 2,
+        ease: "power3.inOut",
+      },
+      0
+    )
+    .from(
+      item4,
+      {
+        y: "-5.375em",
+        duration: 2,
+        ease: "power3.inOut",
+      },
+      0
+    )
     .to(
       content,
       {
         scale: 1,
-        y: "10svh",
         duration: 2,
         ease: "power3.inOut",
       },
@@ -371,7 +400,7 @@ function initTrFlip() {
 }
 
 function intLoader() {
-  const splitText = new SplitType(".[split-2]", {
+  const splitText = new SplitType("[split-2]", {
     types: "lines",
     tagName: "div",
   });
