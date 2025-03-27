@@ -289,14 +289,14 @@ function eventSection() {
     .to(head, {
       scale: 0.8,
       duration: 2,
-      ease: "power3.inOut",
+      ease: "none",
     })
     .from(
       item2,
       {
         y: "-11.0625em",
         duration: 2,
-        ease: "power3.inOut",
+        ease: "none",
       },
       0
     )
@@ -305,7 +305,7 @@ function eventSection() {
       {
         y: "-2em",
         duration: 2,
-        ease: "power3.inOut",
+        ease: "none",
       },
       0
     )
@@ -314,7 +314,7 @@ function eventSection() {
       {
         y: "-5.375em",
         duration: 2,
-        ease: "power3.inOut",
+        ease: "none",
       },
       0
     )
@@ -323,81 +323,83 @@ function eventSection() {
       {
         scale: 1,
         duration: 2,
-        ease: "power3.inOut",
+        ease: "none",
       },
       0
     );
 }
 
 function initTrFlip() {
-  function e(e, t) {
-    const r = typeof e;
-    return "string" !== typeof t || "" === t.trim() ? e : ("true" === t && "boolean" === r) || (("false" !== t || "boolean" !== r) && (isNaN(t) && "string" === r ? t : isNaN(t) || "number" !== r ? e : +t));
+  function parseValue(value, fallback) {
+    if (typeof value === "undefined" || value === null || value.trim() === "") return fallback;
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return isNaN(value) ? value : +value;
   }
-  $("[tr-scrollflip-element='component']").each(function (t) {
-    function r() {
-      o &&
-        (o.kill(),
-        gsap.set(l, {
-          clearProps: "all",
-        }),
-        gsap.set(".hero_home_layout", {
-          clearProps: "all",
-        })),
-        $("body").addClass("scrollflip-relative"),
-        gsap.matchMedia().add(`(min-width: ${f}px)`, () => {
-          const e = Flip.getState(i);
-          (o = gsap.timeline({
-            scrollTrigger: {
-              trigger: s,
-              endTrigger: c,
-              start: u,
-              end: p,
-              scrub: !0,
-            },
-          })),
-            o.add(
-              Flip.from(e, {
-                targets: l,
-                ease: "none",
-                scale: g,
-                stagger: {
-                  amount: m,
-                  from: d,
-                },
-              }),
-              0
-            );
-        }),
-        $("body").removeClass("scrollflip-relative");
-    }
-    let o,
-      a,
-      n = $(this),
-      i = n.find("[tr-scrollflip-element='origin']"),
-      l = n.find("[tr-scrollflip-element='target']"),
-      s = n.find("[tr-scrollflip-scrubstart]"),
-      c = n.find("[tr-scrollflip-scrubend]"),
-      u = e("top top", s.attr("tr-scrollflip-scrubstart")),
-      p = e("bottom bottom", c.attr("tr-scrollflip-scrubend")),
-      m = e(0, n.attr("tr-scrollflip-staggerspeed")),
-      d = e("start", n.attr("tr-scrollflip-staggerdirection")),
-      g = e(!1, n.attr("tr-scrollflip-scale")),
-      f = e(0, n.attr("tr-scrollflip-breakpoint")),
-      y = t;
-    i.each(function (e) {
-      const t = `${y}-${e}`;
-      $(this).attr("data-flip-id", t), l.eq(e).attr("data-flip-id", t);
-    }),
-      r(),
-      window.addEventListener("resize", function () {
-        clearTimeout(a),
-          (a = setTimeout(function () {
-            r();
-          }, 250));
+
+  function setupAnimation(element, index) {
+    let tl;
+    const origin = element.querySelector("[tr-scrollflip-element='origin']");
+    const target = element.querySelector("[tr-scrollflip-element='target']");
+    const scrubStart = element.querySelector("[tr-scrollflip-scrubstart]");
+    const scrubEnd = element.querySelector("[tr-scrollflip-scrubend]");
+    const staggerSpeed = parseValue(element.getAttribute("tr-scrollflip-staggerspeed"), 0);
+    const staggerDirection = parseValue(element.getAttribute("tr-scrollflip-staggerdirection"), "start");
+    const scale = parseValue(element.getAttribute("tr-scrollflip-scale"), false);
+    const breakpoint = parseValue(element.getAttribute("tr-scrollflip-breakpoint"), 0);
+
+    if (!origin || !target || !scrubStart || !scrubEnd) return;
+
+    // Assign unique Flip ID
+    origin.dataset.flipId = `flip-${index}`;
+    target.dataset.flipId = `flip-${index}`;
+
+    function createAnimation() {
+      if (tl) {
+        tl.kill();
+        gsap.set(target, { clearProps: "all" });
+      }
+
+      const state = Flip.getState(origin);
+
+      tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: scrubStart,
+          endTrigger: scrubEnd,
+          start: parseValue(scrubStart.getAttribute("tr-scrollflip-scrubstart"), "top top"),
+          end: parseValue(scrubEnd.getAttribute("tr-scrollflip-scrubend"), "bottom bottom"),
+          scrub: true,
+          onUpdate: () => console.log("ScrollTrigger updating"),
+        },
       });
-  });
+
+      tl.add(
+        Flip.from(state, {
+          targets: target,
+          ease: "none",
+          scale: scale,
+          stagger: { amount: staggerSpeed, from: staggerDirection },
+        }),
+        0
+      );
+    }
+
+    createAnimation();
+    window.addEventListener("resize", () => {
+      clearTimeout(window.resizing);
+      window.resizing = setTimeout(() => {
+        ScrollTrigger.refresh();
+        createAnimation();
+      }, 250);
+    });
+  }
+
+  document.querySelectorAll("[tr-scrollflip-element='component']").forEach(setupAnimation);
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(initTrFlip, 100); // Delay to ensure elements are fully rendered
+});
 
 function intLoader() {
   const splitText = new SplitType("[split-2]", {
@@ -488,13 +490,13 @@ function initAllAnimations() {
   initTrMarquee();
   linesAnimation();
   initLenis();
+  //document.addEventListener('DOMContentLoaded', initTrFlip);
 
   // Home
   document.addEventListener("DOMContentLoaded", initParallaxEffect);
   document.addEventListener("DOMContentLoaded", eventSection);
   document.addEventListener("DOMContentLoaded", whySection);
-  //document.addEventListener('DOMContentLoaded', initTrFlip);
-  initTrFlip();
+  //initTrFlip();
   ScrollTrigger.matchMedia({
     "(min-width: 992px)": function () {
       initSectionOverlap();
@@ -503,3 +505,4 @@ function initAllAnimations() {
 }
 
 initGSAP(), initAllAnimations();
+document.addEventListener("DOMContentLoaded", initTrFlip);
