@@ -192,7 +192,7 @@ function initSolution() {
         ease: "power2.out",
       }
     );
-    gsap.fromTo(".solution-img-2", { width: "7.74em" }, { width: "14.875em", duration: 0.4, ease: "power2.out" });
+    gsap.fromTo(".solution-img-2", { width: "7.6875em" }, { width: "14.875em", duration: 0.4, ease: "power2.out" });
   }
 
   function animateSolution2Out(el) {
@@ -215,7 +215,7 @@ function initSolution() {
       ease: "power2.out",
     });
     gsap.to(".solution-img-2", {
-      width: "7.74em",
+      width: "7.6875em",
       duration: 0.4,
       ease: "power2.out",
     });
