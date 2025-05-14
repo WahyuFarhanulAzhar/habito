@@ -7,17 +7,15 @@ import Lenis from "https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.19/dis
 import SplitType from "https://cdn.jsdelivr.net/npm/split-type@0.3.3/+esm";
 import Swiper from "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs";
 
-function initGSAP() {
-  gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
-  CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
-    CustomEase.create("primary-ease-out", "0.17,0.84,0.44,1"),
-    ScrollTrigger.defaults({
-      markers: false,
-    });
-  gsap.defaults({
-    duration: 1.25,
+gsap.registerPlugin(CustomEase, Flip, ScrollTrigger);
+CustomEase.create("primary-ease", "0.62, 0.05, 0.01, 0.99"),
+  CustomEase.create("primary-ease-out", "0.17,0.84,0.44,1"),
+  ScrollTrigger.defaults({
+    markers: false,
   });
-}
+gsap.defaults({
+  duration: 1.25,
+});
 
 function initLenis() {
   if (Webflow.env("editor") === undefined) {
@@ -34,6 +32,8 @@ function initLenis() {
 
     // Matikan lag smoothing agar tidak ada delay di scroll animasi
     gsap.ticker.lagSmoothing(0);
+
+    window.__lenis = lenis;
 
     return lenis;
   }
@@ -256,7 +256,7 @@ function initParallaxEffect() {
 
     if (target) {
       gsap.to(target, {
-        yPercent: -10, // Sesuaikan efek paralaks
+        yPercent: 10, // Sesuaikan efek paralaks
         ease: "none",
         scrollTrigger: {
           trigger: trigger,
@@ -282,12 +282,13 @@ function eventSection() {
       scrollTrigger: {
         trigger: triggerElement,
         start: "top top",
-        end: "bottom 80%",
-        scrub: 1,
+        end: "95% bottom",
+        scrub: true,
+        markers: false,
       },
     })
     .to(head, {
-      scale: 0.8,
+      scale: 0.6,
       duration: 2,
       ease: "none",
     })
@@ -318,10 +319,10 @@ function eventSection() {
       },
       0
     )
-    .to(
+    .from(
       content,
       {
-        scale: 1,
+        scale: 0.75,
         duration: 2,
         ease: "none",
       },
@@ -330,101 +331,113 @@ function eventSection() {
 }
 
 function initTrFlip() {
-  function parseValue(value, fallback) {
-    if (typeof value === "undefined" || value === null || value.trim() === "") return fallback;
-    if (value === "true") return true;
-    if (value === "false") return false;
-    return isNaN(value) ? value : +value;
+  function e(e, t) {
+    const r = typeof e;
+    return "string" !== typeof t || "" === t.trim() ? e : ("true" === t && "boolean" === r) || (("false" !== t || "boolean" !== r) && (isNaN(t) && "string" === r ? t : isNaN(t) || "number" !== r ? e : +t));
   }
-
-  function setupAnimation(element, index) {
-    let tl;
-    const origin = element.querySelector("[tr-scrollflip-element='origin']");
-    const target = element.querySelector("[tr-scrollflip-element='target']");
-    const scrubStart = element.querySelector("[tr-scrollflip-scrubstart]");
-    const scrubEnd = element.querySelector("[tr-scrollflip-scrubend]");
-    const staggerSpeed = parseValue(element.getAttribute("tr-scrollflip-staggerspeed"), 0);
-    const staggerDirection = parseValue(element.getAttribute("tr-scrollflip-staggerdirection"), "start");
-    const scale = parseValue(element.getAttribute("tr-scrollflip-scale"), false);
-    const breakpoint = parseValue(element.getAttribute("tr-scrollflip-breakpoint"), 0);
-
-    if (!origin || !target || !scrubStart || !scrubEnd) return;
-
-    // Assign unique Flip ID
-    origin.dataset.flipId = `flip-${index}`;
-    target.dataset.flipId = `flip-${index}`;
-
-    function createAnimation() {
-      if (tl) {
-        tl.kill();
-        gsap.set(target, { clearProps: "all" });
-      }
-
-      const state = Flip.getState(origin);
-
-      tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: scrubStart,
-          endTrigger: scrubEnd,
-          start: parseValue(scrubStart.getAttribute("tr-scrollflip-scrubstart"), "top top"),
-          end: parseValue(scrubEnd.getAttribute("tr-scrollflip-scrubend"), "bottom bottom"),
-          scrub: true,
-          onUpdate: () => console.log("ScrollTrigger updating"),
-        },
-      });
-
-      tl.add(
-        Flip.from(state, {
-          targets: target,
-          ease: "none",
-          scale: scale,
-          stagger: { amount: staggerSpeed, from: staggerDirection },
+  $("[tr-scrollflip-element='component']").each(function (t) {
+    function r() {
+      o &&
+        (o.kill(),
+        gsap.set(l, {
+          clearProps: "all",
         }),
-        0
-      );
+        gsap.set(".why-head", {
+          clearProps: "all",
+        })),
+        $("body").addClass("scrollflip-relative"),
+        gsap.matchMedia().add(`(min-width: ${f}px)`, () => {
+          const e = Flip.getState(i);
+          (o = gsap.timeline({
+            scrollTrigger: {
+              trigger: s,
+              endTrigger: c,
+              start: u,
+              end: p,
+              scrub: !0,
+            },
+          })),
+            o.add(
+              Flip.from(e, {
+                targets: l,
+                ease: "none",
+                scale: g,
+                stagger: {
+                  amount: m,
+                  from: d,
+                },
+              }),
+              0
+            );
+        }),
+        $("body").removeClass("scrollflip-relative");
     }
-
-    createAnimation();
-    window.addEventListener("resize", () => {
-      clearTimeout(window.resizing);
-      window.resizing = setTimeout(() => {
-        ScrollTrigger.refresh();
-        createAnimation();
-      }, 250);
-    });
-  }
-
-  document.querySelectorAll("[tr-scrollflip-element='component']").forEach(setupAnimation);
+    let o,
+      a,
+      n = $(this),
+      i = n.find("[tr-scrollflip-element='origin']"),
+      l = n.find("[tr-scrollflip-element='target']"),
+      s = n.find("[tr-scrollflip-scrubstart]"),
+      c = n.find("[tr-scrollflip-scrubend]"),
+      u = e("top top", s.attr("tr-scrollflip-scrubstart")),
+      p = e("bottom bottom", c.attr("tr-scrollflip-scrubend")),
+      m = e(0, n.attr("tr-scrollflip-staggerspeed")),
+      d = e("start", n.attr("tr-scrollflip-staggerdirection")),
+      g = e(!1, n.attr("tr-scrollflip-scale")),
+      f = e(0, n.attr("tr-scrollflip-breakpoint")),
+      y = t;
+    i.each(function (e) {
+      const t = `${y}-${e}`;
+      $(this).attr("data-flip-id", t), l.eq(e).attr("data-flip-id", t);
+    }),
+      r(),
+      window.addEventListener("resize", function () {
+        clearTimeout(a),
+          (a = setTimeout(function () {
+            r();
+          }, 250));
+      });
+  });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(initTrFlip, 100); // Delay to ensure elements are fully rendered
-});
-
 function intLoader() {
-  const splitText = new SplitType("[split-2]", {
-    types: "lines",
+  const splitText = new SplitType("[hero-split]", {
+    types: "lines, words, chars",
     tagName: "div",
+  });
+
+  $("[split-2] .line").each(function () {
+    $(this).wrap('<div class="line-wrap"></div>');
   });
 
   const tl = gsap.timeline();
   tl.from(
     ".hero-img",
     {
-      scale: 0,
-      duration: 1.5,
+      scale: 1.5,
+      duration: 2,
       ease: "power3.inOut",
     },
-    0
+    0.2
   ).from(
-    "[split-2] .line",
+    ".img-block.is-load",
     {
-      yPercent: 50,
-      duration: 1.25,
+      yPercent: 100,
+      duration: 2,
       ease: "power3.inOut",
     },
-    0.3
+    0.2
   );
+  /* .from(
+      '[split-2] .line',
+      {
+        yPercent: 110,
+        duration: 2.25,
+        //stagger: 0.075,
+        ease: 'primary-ease',
+      },
+      0.5
+    ); */
 }
 
 function whySection() {
@@ -442,7 +455,7 @@ function whySection() {
         trigger: triggerHead,
         start: "top top",
         end: "bottom 50%",
-        scrub: 1,
+        scrub: true,
       },
     })
     .to(
@@ -470,7 +483,7 @@ function whySection() {
         trigger: triggerContent,
         start: "top top",
         end: "90% bottom",
-        scrub: 1,
+        scrub: true,
       },
     })
     .from(
@@ -485,18 +498,187 @@ function whySection() {
     );
 }
 
+//navbar animation
+function setupNavbarAnimation() {
+  const navButton = $(".hamburger-toggle");
+  const navMenu = $(".nav-mobile");
+  const navLinks = $(".nav-mobile-text");
+  const popupButton = $(".popup-btn");
+  const bgPopup = $(".bg-popup");
+  const lenis = window.__lenis;
+
+  let isMenuOpen = false;
+
+  function openMenu() {
+    const t = gsap.timeline();
+
+    t.to(
+      navMenu,
+      {
+        duration: 1.25,
+        y: "100dvh",
+        ease: "primary-ease",
+      },
+      0
+    );
+
+    t.fromTo(
+      navLinks,
+      {
+        y: "120%",
+      },
+      {
+        y: "0%",
+        stagger: { amount: 0.2 },
+        duration: 1.25,
+        ease: "primary-ease-out",
+      },
+      0.4
+    );
+
+    $("body").addClass("menu-open");
+    isMenuOpen = true;
+
+    // ❗️Akses aman
+    if (window.__lenis && typeof window.__lenis.stop === "function") {
+      window.__lenis.stop();
+    }
+  }
+
+  function closeMenu() {
+    const t = gsap.timeline();
+
+    t.to(
+      navMenu,
+      {
+        duration: 1.25,
+        y: "0dvh",
+        ease: "primary-ease",
+      },
+      0.3
+    );
+
+    t.fromTo(
+      navLinks,
+      {
+        y: "0%",
+      },
+      {
+        y: "120%",
+        stagger: { amount: 0.2, from: "end" },
+        duration: 1.25,
+        ease: "primary-ease-out",
+      },
+      0
+    );
+
+    $("body").removeClass("menu-open");
+    isMenuOpen = false;
+
+    // ❗️Akses aman
+    if (window.__lenis && typeof window.__lenis.start === "function") {
+      window.__lenis.start();
+    }
+  }
+
+  function toggleMenu() {
+    isMenuOpen ? closeMenu() : openMenu();
+  }
+
+  // Event listeners
+  navButton.on("click", toggleMenu);
+  popupButton.on("click", toggleMenu);
+  bgPopup.on("click", () => isMenuOpen && closeMenu());
+  navLinks.on("click", closeMenu);
+
+  /*
+  $(window).on('resize', () => {
+    if ($(window).width() > 767) {
+      closeMenu();
+      gsap.set(navMenu, { clearProps: 'all' });
+    }
+  });
+  */
+}
+
+function setupNavHoverAnimation() {
+  // Set default state untuk semua elemen
+  $(".nav-link-wrap").each(function () {
+    gsap.set($(this).find(".nav-img"), { scale: 1.3 });
+    gsap.set($(this).find(".img-block"), { yPercent: 100 });
+    gsap.set($(this).find(".nav-mobile-link"), { opacity: 0.4 });
+  });
+
+  // Hover masuk
+  $(".nav-mobile-link").on("mouseenter", function () {
+    const $wrap = $(this).closest(".nav-link-wrap");
+    const $img = $wrap.find(".nav-img");
+    const $block = $wrap.find(".img-block");
+    const $link = $wrap.find(".nav-mobile-link");
+
+    gsap.to($img, {
+      scale: 1,
+      duration: 1,
+      ease: "power3.out",
+    });
+
+    gsap.to($block, {
+      yPercent: -100,
+      duration: 1,
+      ease: "power3.out",
+    });
+
+    gsap.to($link, {
+      opacity: 1,
+      duration: 0.4,
+    });
+  });
+
+  // Hover keluar
+  $(".nav-mobile-link").on("mouseleave", function () {
+    const $wrap = $(this).closest(".nav-link-wrap");
+    const $img = $wrap.find(".nav-img");
+    const $block = $wrap.find(".img-block");
+    const $link = $wrap.find(".nav-mobile-link");
+
+    gsap.to($img, {
+      scale: 1.3,
+      duration: 1,
+      ease: "power3.out",
+    });
+
+    gsap.to($block, {
+      yPercent: 100,
+      duration: 1,
+      ease: "power3.out",
+    });
+
+    gsap.to($link, {
+      opacity: 0.4,
+      duration: 0.4,
+    });
+  });
+}
+
+//init animation
 function initAllAnimations() {
   initSplitText();
-  initTrMarquee();
+  //initTrMarquee();
   linesAnimation();
   initLenis();
-  //document.addEventListener('DOMContentLoaded', initTrFlip);
+  initParallaxEffect();
 
   // Home
-  document.addEventListener("DOMContentLoaded", initParallaxEffect);
-  document.addEventListener("DOMContentLoaded", eventSection);
-  document.addEventListener("DOMContentLoaded", whySection);
-  //initTrFlip();
+  //intLoader();
+  eventSection();
+  whySection();
+  initTrFlip();
+
+  //navbar
+  setupNavbarAnimation();
+  setupNavHoverAnimation();
+  //initNavToggle();
+
   ScrollTrigger.matchMedia({
     "(min-width: 992px)": function () {
       initSectionOverlap();
@@ -504,5 +686,11 @@ function initAllAnimations() {
   });
 }
 
-initGSAP(), initAllAnimations();
-document.addEventListener("DOMContentLoaded", initTrFlip);
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    ScrollTrigger.refresh();
+    window.dispatchEvent(new Event("resize"));
+  }, 300);
+});
+
+initAllAnimations();
