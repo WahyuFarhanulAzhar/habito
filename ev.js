@@ -1,4 +1,4 @@
-gsap.registerPlugin(CustomEase, DrawSVGPlugin, Flip, ScrollTrigger, ScrollSmoother, SplitText);
+gsap.registerPlugin(CustomEase, InertiaPlugin, DrawSVGPlugin, Flip, ScrollTrigger, ScrollSmoother, SplitText);
 
 ScrollSmoother.create({
   smooth: 1.2,
@@ -58,6 +58,108 @@ function linesAnimation() {
       },
     });
   });
+}
+
+function initLoad() {
+  const hero = document.querySelector(".header");
+
+  const bg = hero.querySelector(".hero-absolute");
+  const heading = hero.querySelector(".h1");
+  const tittle = hero.querySelector(".section-tittle");
+  const desc = hero.querySelector(".hero-text");
+  const btn = hero.querySelector(".btn-link");
+  const nav = hero.querySelector(".navbar");
+
+  const splitHeading = new SplitText(heading, {
+    type: "lines, words, chars",
+    mask: "lines",
+  });
+  const splitDesc = new SplitText(desc, {
+    type: "lines, words, chars",
+    mask: "lines",
+  });
+
+  const tl = gsap.timeline();
+
+  tl.set(bg, {
+    clipPath: "inset(25% round 1.5em)",
+  });
+
+  tl.from(bg, {
+    y: "70svh",
+    duration: 1.25,
+    ease: "snappy",
+  });
+
+  ScrollSmoother.get().scrollTo(0, true);
+
+  tl.to(
+    bg,
+    {
+      clipPath: "inset(0% round 0em)",
+      duration: 1.25,
+      ease: "snappy",
+    },
+    "+=0.3"
+  );
+
+  tl.from(
+    splitHeading.chars,
+    {
+      x: "100px",
+      opacity: 0,
+      stagger: 0.03,
+      duration: 0.5,
+      ease: "power4,out",
+    },
+    1.8
+  );
+
+  tl.from(
+    splitDesc.chars,
+    {
+      x: "80px",
+      opacity: 0,
+      stagger: 0.02,
+      duration: 0.4,
+      ease: "power4,out",
+    },
+    2
+  );
+
+  tl.from(
+    tittle,
+    {
+      x: "5em",
+      width: "3.25em",
+      opacity: 0,
+      duration: 0.8,
+      ease: "power4,out",
+    },
+    2.2
+  );
+
+  tl.from(
+    btn,
+    {
+      x: "5em",
+      opacity: 0,
+      duration: 0.8,
+      ease: "power4,out",
+    },
+    2.2
+  );
+
+  tl.from(
+    nav,
+    {
+      y: "-2em",
+      opacity: 0,
+      duration: 0.8,
+      ease: "power4,out",
+    },
+    2
+  );
 }
 
 function initBtnLinkAnimation(selector = ".btn-link") {
@@ -405,7 +507,7 @@ function initFeature() {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: item,
-        start: "top 50%", // Ubah sesuai kebutuhan (misal 'top 80%')
+        start: "top 70%", // Ubah sesuai kebutuhan (misal 'top 80%')
         toggleActions: "play none none none",
       },
     });
@@ -448,14 +550,86 @@ function aosAnimation() {
   gsap.from(".feature-item-head", {
     xPercent: 50,
     opacity: 0,
-    ease: "power2.out",
-    duration: 0.8,
+    ease: "power4.out",
+    duration: 1.25,
     stagger: { each: 0.2, from: "start" },
     scrollTrigger: {
       trigger: ".feature-head",
       start: "top 80%",
       toggleActions: "play none none none",
     },
+  });
+
+  gsap.from(".draw-svg", {
+    drawSVG: "0%",
+    duration: 2,
+    ease: "power4.out",
+    scrollTrigger: {
+      trigger: ".draw-svg",
+      start: "top 80%",
+      toggleActions: "play none none none",
+    },
+  });
+
+  gsap.from(".why-item", {
+    xPercent: 50,
+    opacity: 0,
+    ease: "power4.out",
+    duration: 2,
+    stagger: 0.3,
+    scrollTrigger: {
+      trigger: ".why-content",
+      start: "top 20%",
+      toggleActions: "play none none none",
+    },
+  });
+
+  document.querySelectorAll(".cta-wrapper").forEach((item) => {
+    const tittle = item.querySelector(".section-tittle");
+    const head = item.querySelector(".h2");
+
+    const splitTittle = new SplitText(head, {
+      type: "lines, words, chars",
+    });
+
+    gsap.from(splitTittle.chars, {
+      x: "100px",
+      opacity: 0,
+      duration: 1.25,
+      ease: "power4.out",
+      stagger: 0.03,
+      scrollTrigger: {
+        trigger: head,
+        start: "top 80%",
+        toggleActions: "play none none none",
+      },
+    });
+
+    gsap.from(tittle, {
+      width: "3.25em",
+      x: "5em",
+      duration: 0.8,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: tittle,
+        start: "top 80%",
+        toggleActions: "play none none none",
+      },
+    });
+  });
+
+  document.querySelectorAll("[aos]").forEach((el) => {
+    gsap.from(el, {
+      y: "5svh",
+      opacity: 0,
+      ease: "power4.out",
+      duration: 1.25,
+      scrollTrigger: {
+        trigger: el,
+        start: "top 80%",
+        toggleActions: "play none none none",
+      },
+    });
   });
 }
 
@@ -469,6 +643,10 @@ function initAllAnimations() {
   initFeature();
   aosAnimation();
 }
+
+window.addEventListener("load", () => {
+  initLoad();
+});
 
 window.addEventListener("DOMContentLoaded", () => {
   document.fonts.ready.then(() => {
