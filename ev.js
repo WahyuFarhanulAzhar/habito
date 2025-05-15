@@ -183,7 +183,7 @@ function initBtnLinkAnimation(selector = ".btn-link") {
           "--before-scale": 0,
           duration: 1.25,
           delay: 0,
-          ease: "primary-ease",
+          ease: "power4.out",
           onUpdate: () => updateCSSVars(link),
         },
         0
@@ -194,8 +194,8 @@ function initBtnLinkAnimation(selector = ".btn-link") {
           "--after-opacity": 1,
           "--after-scale": 1,
           duration: 1.25,
-          delay: 0.4,
-          ease: "primary-ease",
+          delay: 0.3,
+          ease: "power4.out",
           onUpdate: () => updateCSSVars(link),
         },
         0
@@ -558,6 +558,18 @@ function aosAnimation() {
       start: "top 80%",
       toggleActions: "play none none none",
     },
+  });
+
+  const marqueeTrack = document.querySelectorAll(".marquee-track");
+  const content = document.querySelectorAll(".marquee-content");
+
+  const width = content.offsetWidth;
+
+  gsap.to(content, {
+    x: "-100%",
+    duration: 10,
+    ease: "none",
+    repeat: -1,
   });
 
   gsap.from(".draw-svg", {
