@@ -60,6 +60,65 @@ function linesAnimation() {
   });
 }
 
+function initSectionOverlap() {
+  gsap.utils.toArray("[data-overlap-previous]").forEach((e) => {
+    const t = e.previousElementSibling;
+    if (!t) return;
+    const r = document.createElement("div");
+    (r.className = "g_section-overlay"), t.appendChild(r);
+    const o = () => window.innerHeight / 4,
+      a = gsap.timeline({
+        scrollTrigger: {
+          trigger: e,
+          start: "top bottom",
+          end: "top top",
+          scrub: !0,
+          onRefresh: (e) => {
+            e.end = `bottom+=${o()}px top`;
+          },
+        },
+      });
+    a.to(
+      t,
+      {
+        y: () => o(),
+        rotate: 0.001,
+        ease: "none",
+      },
+      0
+    ),
+      a.to(
+        r,
+        {
+          opacity: 0.5,
+          ease: "none",
+        },
+        0
+      ),
+      ScrollTrigger.create({
+        trigger: e,
+        start: "top bottom",
+        end: "top top",
+        onEnter: () => {
+          gsap.set(e, {
+            zIndex: 1,
+          }),
+            gsap.set(t, {
+              zIndex: 0,
+            });
+        },
+        onLeaveBack: () => {
+          gsap.set(e, {
+            zIndex: "auto",
+          }),
+            gsap.set(t, {
+              zIndex: "auto",
+            });
+        },
+      });
+  });
+}
+
 function initLoad() {
   const hero = document.querySelector(".header");
 
@@ -72,11 +131,9 @@ function initLoad() {
 
   const splitHeading = new SplitText(heading, {
     type: "lines, words, chars",
-    mask: "lines",
   });
   const splitDesc = new SplitText(desc, {
     type: "lines, words, chars",
-    mask: "lines",
   });
 
   const tl = gsap.timeline();
@@ -447,8 +504,8 @@ function initWork() {
     pinSpacing: true,
   });
 
-  gsap.to(".work-list", {
-    x: "-58.125em",
+  gsap.from(".work-list", {
+    x: "100%",
     ease: "none",
     scrollTrigger: {
       trigger: ".work-content-block",
@@ -645,15 +702,35 @@ function aosAnimation() {
   });
 }
 
+function initHeroOverlap() {
+  const hero = document.querySelector(".header");
+  const wrapper = hero.querySelector(".hero-wrapper");
+
+  gsap.to(wrapper, {
+    //y: '10svh',
+    //opacity: 0,
+    duration: 1.25,
+    ease: "none",
+    scrollTrigger: {
+      trigger: hero,
+      start: "bottom bottom",
+      end: "bottom 25%",
+      scrub: true,
+    },
+  });
+}
+
 function initAllAnimations() {
   splitText();
   linesAnimation();
   initBtnLinkAnimation(".btn-link");
   initParallaxEffect();
+  initSectionOverlap();
   initSolution();
   initWork();
   initFeature();
   aosAnimation();
+  initHeroOverlap();
 }
 
 window.addEventListener("load", () => {
